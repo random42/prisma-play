@@ -12,7 +12,7 @@
   "compilerOptions": {
     "module": "commonjs",
     "baseUrl": ".",
-    "declaration": true,
+    "declaration": false, // TODO
     "removeComments": true,
     "esModuleInterop": true,
     "sourceMap": true,
