@@ -9,6 +9,16 @@ async function main() {
     take: 0,
   });
   console.log(json(data));
+  const x = await db.user.upsert({
+    where: {
+      id: 1,
+    },
+    create: {
+      email: 'asd',
+    },
+    update: { email: 'asd' },
+  });
+  console.log(json(x));
 }
 
 main().catch(console.error);
