@@ -4,21 +4,28 @@ import { json } from './utils';
 
 async function main() {
   // const db = new PrismaClient();
-  const data = await db.comment.findPaginated<typeof db.comment>({
-    page: 0,
-    take: 0,
-  });
-  console.log(json(data));
-  const x = await db.user.upsert({
-    where: {
-      id: 1,
+  const data = await db.comment.findPaginated({
+    page: 2,
+    take: 11,
+    select: {
+      id: true,
+      content: true,
+      author: {
+        select: {
+          _count: true,
+          email: true,
+          posts: {
+            select: {
+              title: true,
+            },
+          },
+        },
+      },
     },
-    create: {
-      email: 'asd',
+    orderBy: {
+      id: 'desc',
     },
-    update: { email: 'asd' },
   });
-  console.log(json(x));
 }
 
 main().catch(console.error);

@@ -3,7 +3,7 @@
 
 generator client {
   provider        = "prisma-client-js"
-  previewFeatures = ["clientExtensions", "fieldReference", "fullTextIndex", "fullTextSearch", "metrics", "filteredRelationCount", "orderByNulls", "tracing"]
+  previewFeatures = ["clientExtensions", "fieldReference", "fullTextIndex", "fullTextSearch", "metrics", "filteredRelationCount", "orderByNulls", "tracing", "extendedWhereUnique", "postgresqlExtensions", "views"]
 }
 
 datasource db {
