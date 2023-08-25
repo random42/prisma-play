@@ -1,22 +1,30 @@
+import dotenv from 'dotenv';
 import { db } from './client';
-import { PrismaClient } from '@prisma/client';
-import { json } from './utils';
+dotenv.config();
+
+const json = (x) => console.log(JSON.stringify(x, null, 2));
 
 async function main() {
   // const db = new PrismaClient();
-  const data = await db.comment.findPaginated({
-    page: 2,
-    take: 11,
+  let data;
+  data = {};
+  data = {};
+  data = await db.comment.paginate({
+    page: 0,
+    take: 1,
     select: {
       id: true,
-      content: true,
       author: {
         select: {
-          _count: true,
-          email: true,
+          id: true,
           posts: {
             select: {
-              title: true,
+              id: true,
+            },
+            where: {
+              authorId: {
+                lt: db.post.fields.id,
+              },
             },
           },
         },
@@ -25,7 +33,11 @@ async function main() {
     orderBy: {
       id: 'desc',
     },
+    cursor: {
+      id: 1,
+    },
   });
+  return data;
 }
 
-main().catch(console.error);
+main().then(json).catch(console.error);

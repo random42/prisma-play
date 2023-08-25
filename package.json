@@ -8,10 +8,9 @@
     "studio": "prisma studio",
     "sync": "prisma db push",
     "seed": "ts-node src/data.ts",
-    "types": "prisma generate",
     "upgrade": "npm i -D prisma@latest && npm i @prisma/client@latest",
     "prebuild": "rimraf dist",
-    "build": "tsc",
+    "build": "prisma generate && tsc",
     "prepare": "run-s build",
     "format": "prettier --write '{src,test}/**/*.ts'",
     "lint": "eslint --fix --ext ts '{src,test}/**'",
@@ -19,17 +18,20 @@
   },
   "dependencies": {
     "@faker-js/faker": "^7.6.0",
-    "@prisma/client": "~4.9"
+    "@prisma/client": "^5.2.0",
+    "dotenv": "^16.3.1",
+    "lodash": "^4.17.21"
   },
   "devDependencies": {
     "@tsconfig/recommended": "^1.0.1",
+    "@types/lodash": "^4.14.197",
     "@types/node": "^16.18.3",
     "@typescript-eslint/eslint-plugin": "^5.43.0",
     "@typescript-eslint/parser": "^5.43.0",
     "eslint": "^8.27.0",
     "npm-run-all": "^4.1.5",
     "prettier": "^2.7.1",
-    "prisma": "~4.9",
+    "prisma": "^5.2.0",
     "rimraf": "^3.0.2",
     "ts-node-dev": "^2.0.0",
     "typescript": "~4.9"

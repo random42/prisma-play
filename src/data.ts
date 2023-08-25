@@ -1,5 +1,5 @@
-import { PrismaClient } from '@prisma/client';
 import { faker } from '@faker-js/faker';
+import { db } from './client';
 
 export function generate() {
   const USERS = 10;
@@ -41,8 +41,6 @@ export function generate() {
 
 export async function genAndInsert() {
   const data = generate();
-  const db = new PrismaClient();
-
   await db.user.createMany({
     data: data.users,
   });

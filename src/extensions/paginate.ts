@@ -1,7 +1,7 @@
 import { Prisma } from '@prisma/client';
-import { Extension } from './types';
+import omit from 'lodash/omit';
 
-async function findPaginated<T, A>(
+async function _paginate<T, A>(
   this: T,
   args: Prisma.Exact<
     A,
@@ -21,18 +21,10 @@ async function findPaginated<T, A>(
   const { page, take } = arg;
   const skip = page * take;
   const findManyArgs = {
-    ...arg,
+    ...omit(arg, ['page']),
     skip,
-    page: undefined,
   };
-  const countArgs = {
-    ...arg,
-    select: undefined,
-    page: undefined,
-    skip: undefined,
-    take: undefined,
-    cursor: undefined,
-  };
+  const countArgs = omit(arg, ['select', 'include', 'page', 'skip', 'take']);
   const [results, count] = await Promise.all([
     self.findMany(findManyArgs),
     self.count(countArgs),
@@ -47,10 +39,10 @@ async function findPaginated<T, A>(
   };
 }
 
-export const paginated = {
+export const paginate = Prisma.defineExtension({
   model: {
     $allModels: {
-      findPaginated,
+      paginate: _paginate,
     },
   },
-};
+});

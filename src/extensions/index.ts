@@ -1,2 +1,1 @@
-export * from './paginated';
-export * from './types';
+export * from './paginate';
