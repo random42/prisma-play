@@ -16,7 +16,7 @@ async function _paginate<T, A>(
   count: number;
   results: Prisma.Result<T, A, 'findMany'>;
 }> {
-  const self = this as any;
+  const ctx = Prisma.getExtensionContext(this) as any;
   const arg = args as any;
   const { page, take } = arg;
   const skip = page * take;
@@ -26,8 +26,8 @@ async function _paginate<T, A>(
   };
   const countArgs = omit(arg, ['select', 'include', 'page', 'skip', 'take']);
   const [results, count] = await Promise.all([
-    self.findMany(findManyArgs),
-    self.count(countArgs),
+    ctx.findMany(findManyArgs),
+    ctx.count(countArgs),
   ]);
   const totalPages =
     count % take === 0 ? count / take : Math.ceil(count / take);
@@ -39,7 +39,7 @@ async function _paginate<T, A>(
   };
 }
 
-export const paginate = Prisma.defineExtension({
+export default Prisma.defineExtension({
   model: {
     $allModels: {
       paginate: _paginate,

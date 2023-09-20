@@ -5,15 +5,12 @@
     "examples",
     "test"
   ],
-  "exclude": [
-    "node_modules",
-    "dist"
-  ],
+  "exclude": [],
   "compilerOptions": {
     "strict": true,
     "module": "commonjs",
     "baseUrl": ".",
-    "declaration": false, // TODO
+    "declaration": true,
     "removeComments": true,
     "esModuleInterop": true,
     "sourceMap": true,
