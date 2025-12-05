@@ -1,37 +1,39 @@
 import { faker } from '@faker-js/faker';
+import { Prisma } from '@prisma/client';
 import { db } from './client';
 
-export function generate() {
-  const USERS = 10;
-  const POSTS = 50;
-  const COMMENTS = 300;
-  const users = new Array(USERS).fill({}).map((x, i) => ({
+const USERS = 10;
+const POSTS = 50;
+const COMMENTS = 300;
+
+type SeedData = {
+  users: Prisma.UserCreateManyInput[];
+  posts: Prisma.PostCreateManyInput[];
+  comments: Prisma.CommentCreateManyInput[];
+};
+
+export function generate(): SeedData {
+  const users = Array.from({ length: USERS }, (_, i) => ({
     id: i + 1,
-    email: faker.helpers.unique(faker.internet.email),
-    name: faker.internet.userName(),
+    email: `${faker.internet.email().split('@')[0]}+${i}@example.com`,
+    name: faker.internet.username(),
   }));
-  const posts = new Array(POSTS).fill({}).map((x, i) => ({
+
+  const posts = Array.from({ length: POSTS }, (_, i) => ({
     id: i + 1,
-    title: faker.word.noun(2),
-    content: faker.lorem.paragraph(2),
-    published: faker.datatype.boolean(),
-    authorId: faker.datatype.number({
-      min: 1,
-      max: USERS - 1,
-    }),
+    title: faker.lorem.words(3),
+    content: faker.lorem.paragraph({ min: 1, max: 2 }),
+    published: faker.helpers.arrayElement([true, false]),
+    authorId: faker.number.int({ min: 1, max: USERS }),
   }));
-  const comments = new Array(COMMENTS).fill({}).map((x, i) => ({
+
+  const comments = Array.from({ length: COMMENTS }, (_, i) => ({
     id: i + 1,
-    content: faker.lorem.paragraph(2),
-    authorId: faker.datatype.number({
-      min: 1,
-      max: USERS - 1,
-    }),
-    postId: faker.datatype.number({
-      min: 1,
-      max: POSTS - 1,
-    }),
+    content: faker.lorem.paragraph({ min: 1, max: 2 }),
+    authorId: faker.number.int({ min: 1, max: USERS }),
+    postId: faker.number.int({ min: 1, max: POSTS }),
   }));
+
   return {
     users,
     posts,
@@ -39,7 +41,7 @@ export function generate() {
   };
 }
 
-export async function genAndInsert() {
+export async function genAndInsert(): Promise<void> {
   const data = generate();
   await db.user.createMany({
     data: data.users,
@@ -53,5 +55,8 @@ export async function genAndInsert() {
 }
 
 if (require.main === module) {
-  genAndInsert().catch(console.error);
+  genAndInsert().catch((err) => {
+    console.error(err);
+    process.exit(1);
+  });
 }

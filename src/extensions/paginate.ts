@@ -9,7 +9,7 @@ async function _paginate<T, A>(
       page: number;
       take: number;
     }
-  >
+  >,
 ): Promise<{
   page: number;
   totalPages: number;
@@ -19,7 +19,8 @@ async function _paginate<T, A>(
   const ctx = Prisma.getExtensionContext(this) as any;
   const arg = args as any;
   const { page, take } = arg;
-  const skip = page * take;
+  const safePage = page < 1 ? 1 : page;
+  const skip = Math.max(0, (safePage - 1) * take);
   const findManyArgs = {
     ...omit(arg, ['page']),
     skip,
@@ -29,10 +30,9 @@ async function _paginate<T, A>(
     ctx.findMany(findManyArgs),
     ctx.count(countArgs),
   ]);
-  const totalPages =
-    count % take === 0 ? count / take : Math.ceil(count / take);
+  const totalPages = count === 0 ? 0 : Math.ceil(count / take);
   return {
-    page,
+    page: safePage,
     totalPages,
     count,
     results,

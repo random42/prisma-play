@@ -4,38 +4,44 @@
   "description": "",
   "author": "Roberto Sero",
   "scripts": {
-    "dev": "tsnd --clear --respawn --inspect=0.0.0.0:9229 -- src/main.ts",
+    "dev": "NODE_OPTIONS=--enable-source-maps tsx watch --inspect=0.0.0.0:9229 src/main.ts",
     "studio": "prisma studio",
     "sync": "prisma db push",
-    "seed": "ts-node src/data.ts",
+    "seed": "tsx src/data.ts",
     "upgrade": "npm i -D prisma@latest && npm i @prisma/client@latest",
     "prebuild": "rimraf dist",
     "build": "prisma generate && tsc",
-    "prepare": "run-s build",
-    "format": "prettier --write '{src,test}/**/*.ts'",
-    "lint": "eslint --fix --ext ts '{src,test}/**'",
+    "typecheck": "tsc --noEmit",
+    "prepare": "npm run build",
+    "format": "prettier --write 'src/**/*.ts' 'test/**/*.ts'",
+    "lint": "eslint . --ext ts",
     "test": "echo no test yet"
   },
   "dependencies": {
-    "@faker-js/faker": "^7.6.0",
-    "@prisma/client": "^5.2.0",
-    "dotenv": "^16.3.1",
-    "ioredis": "^5.3.2",
-    "lodash": "^4.17.21"
+    "@prisma/adapter-pg": "^7.1.0",
+    "@faker-js/faker": "^10.1.0",
+    "@prisma/client": "^7.1.0",
+    "dotenv": "^17.2.3",
+    "ioredis": "^5.8.2",
+    "lodash": "^4.17.21",
+    "pg": "^8.13.1"
   },
   "devDependencies": {
-    "@tsconfig/recommended": "^1.0.1",
-    "@types/lodash": "^4.14.197",
-    "@types/node": "^16.18.3",
-    "@typescript-eslint/eslint-plugin": "^5.43.0",
-    "@typescript-eslint/parser": "^5.43.0",
-    "eslint": "^8.27.0",
+    "@eslint/js": "^9.39.0",
+    "@tsconfig/recommended": "^1.0.13",
+    "@types/lodash": "^4.17.21",
+    "@types/node": "^24.10.1",
+    "@typescript-eslint/eslint-plugin": "^8.48.1",
+    "@typescript-eslint/parser": "^8.48.1",
+    "typescript-eslint": "^8.48.1",
+    "eslint": "^9.39.1",
+    "globals": "^15.11.0",
     "npm-run-all": "^4.1.5",
-    "prettier": "^2.7.1",
-    "prisma": "^5.2.0",
-    "rimraf": "^3.0.2",
-    "ts-node-dev": "^2.0.0",
-    "typescript": "~4.9"
+    "prettier": "^3.7.4",
+    "prisma": "^7.1.0",
+    "rimraf": "^6.1.2",
+    "tsx": "^4.19.2",
+    "typescript": "^5.9.3"
   },
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -43,5 +49,8 @@
   "files": [
     "dist/**"
   ],
+  "engines": {
+    "node": ">=20"
+  },
   "license": "MIT"
 }

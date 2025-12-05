@@ -1,12 +1,18 @@
 version: '3.9'
 services:
   db:
-    image: postgres:14
+    image: postgres:17
+    restart: unless-stopped
     ports:
       - 5432:5432
     environment:
       POSTGRES_DB: mydb
       POSTGRES_USER: pg
       POSTGRES_PASSWORD: pg
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U pg -d mydb"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
     volumes:
       - ./var/pg:/var/lib/postgresql/data:delegated
