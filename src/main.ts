@@ -664,6 +664,44 @@ async function rawSQLExamples() {
   );
   printData('Raw count', results);
   info('⚠️  Use queryRawUnsafe carefully - vulnerable to SQL injection!');
+
+  // TypedSQL - Type-safe SQL queries from .sql files
+  subsection('7.5 - TypedSQL: Type-safe SQL from .sql files');
+  try {
+    // Import TypedSQL queries
+    const { getUsersWithPosts } = await import('@prisma/client/sql');
+    const { getTopUsersByReputation } = await import('@prisma/client/sql');
+    const { searchPostsByContent } = await import('@prisma/client/sql');
+
+    // Query 1: Users with post counts (no parameters)
+    const usersWithPostCounts = await rawDb.$queryRawTyped(getUsersWithPosts());
+    info('📄 Query from: prisma/sql/getUsersWithPosts.sql');
+    printTable(usersWithPostCounts.slice(0, 5));
+
+    // Query 2: Top users by reputation (with parameters)
+    const minReputation = 50;
+    const limit = 3;
+    const topUsers = await rawDb.$queryRawTyped(
+      getTopUsersByReputation(minReputation, limit)
+    );
+    info(
+      `📄 Query from: prisma/sql/getTopUsersByReputation.sql (min: ${minReputation}, limit: ${limit})`
+    );
+    printTable(topUsers);
+
+    // Query 3: Search posts by content (with string parameter)
+    const searchResults = await rawDb.$queryRawTyped(
+      searchPostsByContent('the')
+    );
+    info("📄 Query from: prisma/sql/searchPostsByContent.sql (search: 'the')");
+    printTable(searchResults.slice(0, 3));
+
+    success(
+      'TypedSQL provides full type safety for custom SQL queries from .sql files!'
+    );
+  } catch (error) {
+    info(`⚠️  TypedSQL queries not available (run: npx prisma generate --sql)`);
+  }
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -893,6 +931,44 @@ async function advancedPatterns() {
   info('Post without content and metadata (reduces payload size)');
   if (postWithLimitedFields) {
     info(`Post ID ${postWithLimitedFields.id}: ${postWithLimitedFields.title}`);
+  }
+
+  // Views - Query database views like models
+  subsection('9.8 - Database Views (read-only virtual tables)');
+  try {
+    // Query the UserInfo view (combines User and Profile data)
+    const userInfos = await db.userInfo.findMany({
+      take: 5,
+      orderBy: { id: 'asc' },
+    });
+    info(
+      '👁️  UserInfo view combines User and Profile tables (defined in prisma/views/public/UserInfo.sql)'
+    );
+    printTable(userInfos);
+
+    // Filter view results - find users with profiles
+    const usersWithProfiles = await db.userInfo.findMany({
+      where: {
+        location: { not: '' },
+      },
+      take: 3,
+      orderBy: { id: 'asc' },
+    });
+    info(`Found ${usersWithProfiles.length} users with profile locations`);
+    if (usersWithProfiles[0]) {
+      printData('User with profile data (via view)', usersWithProfiles[0]);
+    }
+
+    success(
+      'Views provide read-only access to pre-defined SQL queries with full type safety!'
+    );
+    info(
+      'Note: Write operations (create/update/delete) are not available on views'
+    );
+  } catch (error) {
+    info(
+      '⚠️  UserInfo view not available (create view in database and add to schema.prisma)'
+    );
   }
 }
 

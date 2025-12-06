@@ -28,20 +28,21 @@ export async function genAndInsert(): Promise<void> {
       const email = `${faker.internet.email().split('@')[0]}+${i}@example.com`;
       const role = i === 0 ? 'ADMIN' : i < 3 ? 'MODERATOR' : 'USER';
 
+      const hasWebsite = faker.datatype.boolean();
+      const hasBio = faker.datatype.boolean({ probability: 0.7 });
+
       return rawDb.user.create({
         data: {
           email,
           name,
-          bio: faker.helpers.maybe(() => faker.person.bio(), {
-            probability: 0.7,
-          }),
+          ...(hasBio && { bio: faker.person.bio() }),
           role,
           profileViews: faker.number.int({ min: 0, max: 1000 }),
           reputation: faker.number.int({ min: 0, max: 500 }),
           metadata: {
             location: faker.location.city(),
-            website: faker.helpers.maybe(() => faker.internet.url(), {
-              probability: 0.5,
+            ...(hasWebsite && {
+              website: faker.internet.url(),
             }),
             social: {
               twitter: faker.internet.username(),
@@ -53,7 +54,25 @@ export async function genAndInsert(): Promise<void> {
     })
   );
 
-  // 2. Create categories with hierarchy
+  // 2. Create profiles for some users (demonstrating view data)
+  console.log('Creating profiles...');
+  await Promise.all(
+    users.slice(0, Math.floor(USERS / 2)).map(async (user) => {
+      const hasWebsite = faker.datatype.boolean();
+
+      return rawDb.profile.create({
+        data: {
+          userId: user.id,
+          bio: faker.person.bio(),
+          avatarUrl: faker.image.avatar(),
+          ...(hasWebsite && { website: faker.internet.url() }),
+          location: faker.location.city(),
+        },
+      });
+    })
+  );
+
+  // 3. Create categories with hierarchy
   console.log('Creating categories...');
   const rootCategories = await Promise.all(
     Array.from({ length: 5 }, async (_, i) => {
@@ -83,7 +102,7 @@ export async function genAndInsert(): Promise<void> {
     })
   );
 
-  // 3. Create tags
+  // 4. Create tags
   console.log('Creating tags...');
   const tags = await Promise.all(
     Array.from({ length: TAGS }, async () => {
@@ -114,7 +133,7 @@ export async function genAndInsert(): Promise<void> {
     })
   );
 
-  // 4. Create posts with various statuses
+  // 5. Create posts with various statuses
   console.log('Creating posts...');
   const posts = await Promise.all(
     Array.from({ length: POSTS }, async (_, i) => {
@@ -155,7 +174,7 @@ export async function genAndInsert(): Promise<void> {
     })
   );
 
-  // 5. Create comments (including replies)
+  // 6. Create comments (including replies)
   console.log('Creating comments...');
   const topLevelComments = await Promise.all(
     Array.from({ length: Math.floor(COMMENTS * 0.7) }, async () => {

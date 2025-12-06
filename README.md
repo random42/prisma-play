@@ -44,11 +44,14 @@ This project showcases **every major Prisma v7 feature** documented at [prisma.i
 - Interactive transactions with rollback
 - Batch operations: `createMany`, `updateMany`, `deleteMany`
 
-### 7. **Raw SQL** (Section 7)
+### 7. **Raw SQL & TypedSQL** (Section 7)
 - `$queryRaw` for SELECT queries
 - Parameterized queries (SQL injection safe)
 - `$executeRaw` for UPDATE/INSERT/DELETE
 - `$queryRawUnsafe` for dynamic table/column names
+- **TypedSQL**: Type-safe SQL queries from `.sql` files with `$queryRawTyped`
+- Parameters with full type inference
+- Queries defined in `prisma/sql/` directory
 
 ### 8. **Client Extensions** (Section 8)
 - **Cache Extension**: Optional query caching
@@ -66,6 +69,7 @@ This project showcases **every major Prisma v7 feature** documented at [prisma.i
 - Optimistic concurrency control
 - Hierarchical data (tree structures)
 - **Field omission** with `omit` option (exclude sensitive data)
+- **Database Views**: Query pre-defined views like regular models (read-only)
 
 ### 10. **Performance & Optimization** (Section 10)
 - Field selection for reduced data transfer
@@ -113,6 +117,7 @@ This project showcases **every major Prisma v7 feature** documented at [prisma.i
 
 After running `npm run seed`, you'll have:
 - **20 users**: Mix of USER, ADMIN, MODERATOR roles
+- **10 profiles**: User profiles with avatars, websites, locations (for demonstrating views)
 - **60 posts**: Across DRAFT, PUBLISHED, ARCHIVED statuses
 - **200 comments**: Including threaded replies
 - **15 tags**: Connected to posts via many-to-many
@@ -131,3 +136,42 @@ npm run studio       # Open Prisma Studio (database GUI)
 npm run check        # Lint with Biome
 npm run fix          # Auto-fix linting issues
 ```
+
+## 🧪 Technologies & Preview Features
+
+### Core Stack
+- **Prisma ORM v7.1.0** - Next-generation Node.js/TypeScript ORM
+- **PostgreSQL 17** - Running in Docker container
+- **@prisma/adapter-pg** - PostgreSQL driver adapter for connection pooling
+- **TypeScript** - Full type safety throughout
+- **tsx** - Fast TypeScript execution
+
+### Active Preview Features
+This project enables all applicable Prisma v7 preview features:
+
+- ✅ **`views`** - Database views support (read-only virtual tables)
+- ✅ **`relationJoins`** - Optimized relation queries with SQL JOINs
+- ✅ **`nativeDistinct`** - Native SQL DISTINCT for better performance
+- ✅ **`typedSql`** - Type-safe SQL queries from `.sql` files
+- ✅ **`strictUndefinedChecks`** - Stricter TypeScript undefined handling
+- ✅ **`fullTextSearchPostgres`** - PostgreSQL full-text search capabilities
+
+To enable these features, they're configured in `prisma/schema.prisma`:
+```prisma
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["views", "relationJoins", "nativeDistinct", "typedSql", "strictUndefinedChecks", "fullTextSearchPostgres"]
+}
+```
+
+### TypedSQL Setup
+TypedSQL queries are stored in `prisma/sql/` and compiled during `prisma generate --sql`:
+- `getUsersWithPosts.sql` - Users with post counts
+- `getTopUsersByReputation.sql` - Top users by reputation (with parameters)
+- `searchPostsByContent.sql` - Search posts with engagement scores
+
+### Database Views
+The `UserInfo` view combines User and Profile data:
+- View definition: `prisma/views/public/UserInfo.sql`
+- Manually created in database (views aren't applied by Prisma Migrate)
+- Queryable like a regular model in Prisma Client
