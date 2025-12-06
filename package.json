@@ -4,7 +4,7 @@
   "description": "",
   "author": "Roberto Sero",
   "scripts": {
-    "dev": "NODE_OPTIONS=--enable-source-maps tsx watch --inspect=0.0.0.0:9229 src/main.ts",
+    "dev": "NODE_OPTIONS=--enable-source-maps tsx --inspect=0.0.0.0:9229 src/main.ts",
     "studio": "prisma studio",
     "sync": "prisma db push",
     "seed": "tsx src/data.ts",

@@ -2,36 +2,150 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["fullTextSearchPostgres"]
 }
 
 datasource db {
   provider = "postgresql"
 }
 
+// Enums showcase
+enum Role {
+  USER
+  ADMIN
+  MODERATOR
+}
+
+enum PostStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+// Main User model with advanced features
 model User {
-  id       Int       @id @default(autoincrement())
-  email    String    @unique
-  name     String?
-  posts    Post[]
-  comments Comment[]
+  id    Int     @id @default(autoincrement())
+  email String  @unique
+  name  String?
+  bio   String?
+  role  Role    @default(USER)
+
+  // DateTime fields with defaults
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // JSON field for flexible metadata
+  metadata Json?
+
+  // Soft delete pattern
+  deletedAt DateTime?
+
+  // Numeric fields for aggregations
+  profileViews Int @default(0)
+  reputation   Int @default(0)
+
+  // Relations
+  posts        Post[]
+  comments     Comment[]
+  authoredTags Tag[]
+
+  // Self-relation: followers/following
+  followers User[] @relation("UserFollows")
+  following User[] @relation("UserFollows")
+
+  @@index([email])
+  @@index([role])
+  @@index([createdAt])
 }
 
+// Post model with comprehensive features
 model Post {
-  id        Int       @id @default(autoincrement())
-  title     String
-  content   String?
-  published Boolean   @default(false)
-  author    User?     @relation(fields: [authorId], references: [id])
-  authorId  Int?
-  comments  Comment[]
+  id      Int        @id @default(autoincrement())
+  title   String
+  content String?
+  slug    String     @unique
+  status  PostStatus @default(DRAFT)
+
+  // DateTime tracking
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  publishedAt DateTime?
+
+  // Metrics for aggregation examples
+  viewCount Int @default(0)
+  likeCount Int @default(0)
+
+  // JSON for flexible data
+  metadata Json?
+
+  // Author relation
+  author   User? @relation(fields: [authorId], references: [id], onDelete: SetNull)
+  authorId Int?
+
+  // Relations
+  comments Comment[]
+  tags     Tag[]     @relation("PostTags")
+
+  @@unique([authorId, title]) // Composite unique constraint
+  @@index([status])
+  @@index([authorId])
+  @@index([createdAt])
+  @@index([slug])
 }
 
+// Comment model
 model Comment {
-  id       Int    @id @default(autoincrement())
-  content  String
-  post     Post   @relation(fields: [postId], references: [id])
+  id        Int      @id @default(autoincrement())
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  post     Post @relation(fields: [postId], references: [id], onDelete: Cascade)
   postId   Int
-  author   User   @relation(fields: [authorId], references: [id])
+  author   User @relation(fields: [authorId], references: [id], onDelete: Cascade)
   authorId Int
+
+  // Self-relation: replies
+  parent   Comment?  @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  parentId Int?
+  replies  Comment[] @relation("CommentReplies")
+
+  @@index([postId])
+  @@index([authorId])
+  @@index([createdAt])
+}
+
+// Tag model for many-to-many relationship
+model Tag {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  slug      String   @unique
+  createdAt DateTime @default(now())
+
+  // Creator relation
+  creator   User @relation(fields: [creatorId], references: [id])
+  creatorId Int
+
+  // Many-to-many with Post
+  posts Post[] @relation("PostTags")
+
+  @@index([name])
+}
+
+// Category model for hierarchical data
+model Category {
+  id          Int     @id @default(autoincrement())
+  name        String
+  slug        String  @unique
+  description String?
+
+  // Self-relation for parent/child hierarchy
+  parent   Category?  @relation("CategoryHierarchy", fields: [parentId], references: [id])
+  parentId Int?
+  children Category[] @relation("CategoryHierarchy")
+
+  @@index([slug])
+  @@index([parentId])
 }
