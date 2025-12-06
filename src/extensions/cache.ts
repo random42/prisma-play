@@ -1,4 +1,4 @@
-import { Prisma, PrismaPromise } from '@prisma/client';
+import { Prisma, type PrismaPromise } from '@prisma/client';
 import omit from 'lodash/omit';
 
 const REQUIRED_ARGS_OPERATIONS = [

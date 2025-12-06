@@ -1,5 +1,5 @@
 import { faker } from '@faker-js/faker';
-import { Prisma } from '@prisma/client';
+import type { Prisma } from '@prisma/client';
 import { db } from './client';
 
 const USERS = 10;
